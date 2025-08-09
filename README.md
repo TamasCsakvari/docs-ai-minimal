@@ -8,30 +8,32 @@ We use:
 * **Redis** for caching
 * **Docker Compose** to run Postgres + Redis locally
 
-## 1. Prerequisites
+## Requirements
 * Python 3.11+
 * Docker Desktop
 * Google AI Studio API key (`GEMINI_API_KEY`)
 
-## 2. Clone & Environment Setup
+## Usage
+
+### Clone & Environment Setup
 ```bash
 git clone <this-repo-url>
 cd docs-ai-minimal
 ```
 
-### Create and activate virtual environment
+#### Create and activate virtual environment
 ```bash
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1 # Windows PowerShell
 source .venv/bin/activate # macOS/Linux
 ```
 
-### Install dependencies
+#### Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### Environment variables
+#### Environment variables
 Create `.env` in the repo root:
 ```env
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/postgres
@@ -39,7 +41,7 @@ REDIS_URL=redis://localhost:6379
 GEMINI_API_KEY=YOUR_GOOGLE_AI_STUDIO_KEY
 ```
 
-## 3. Start Postgres + Redis
+### Start Postgres + Redis
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
@@ -50,13 +52,13 @@ docker cp infra/sql_init.sql docs-ai-minimal-pg-1:/sql_init.sql
 docker exec -it docs-ai-minimal-pg-1 psql -U postgres -f /sql_init.sql
 ```
 
-## 4. Run the API server
+### Run the API server
 
 ```bash
 python -m uvicorn api.main:app --reload
 ```
 
-## 5. Usage
+### Usage
 
 ### Upload a PDF
 ```bash
@@ -70,7 +72,7 @@ curl -X POST http://localhost:8000/ask \
   -d '{"question": "Summarize the document in 2 sentences."}'
 ```
 
-## 6. How It Works
+## How It Works
 * **/upload** → Extracts PDF text, chunks it (with overlap), generates embeddings via `google-genai` (output\_dimensionality=768), stores in Postgres pgvector.
 * **/ask** → Embeds the query, searches similar chunks in pgvector, sends top results to Gemini 1.5 Flash for the answer.
 
@@ -83,13 +85,71 @@ def chunk(text: str, max_chars=2400, overlap=150):
 * `overlap` → shared characters between chunks
 
 
-## 7. Performance Notes
-* **Embedding size:** We use 768-d vectors to match `vector(768)` in DB.
-* **Batching:** Implemented with `google-genai` for faster ingestion.
-* **Overlap tuning:** Keep 10–15% overlap to preserve context.
 
-## 9. Reset Local Data
+## Reset Local Data
 This removes all DB + Redis data.
 ```bash
 docker compose -f docker-compose.dev.yml down -v
 ```
+
+
+
+## Code Architecture & Functionality
+
+**High-level flow**
+
+1. `POST /upload` → extract PDF text → chunk → embed chunks (batching + backoff) → store text + vectors in Postgres (pgvector).
+2. `POST /ask` → embed query → cosine search in pgvector → pass top docs as context to Gemini → return grounded answer.
+
+**Directories**
+
+* `api/`
+
+  * `main.py` – FastAPI app + router registration.
+  * `routes.py` – HTTP endpoints: `/healthz`, `/upload`, `/ask`.
+* `core/`
+
+  * `ingest.py` – PDF → text, chunking, calls `embed_docs()` and persists rows.
+  * `llm.py` – Text generation (Gemini 1.5 Flash) and embeddings (google‑genai) with batching + retry/backoff.
+  * `workflows.py` – Minimal RAG pipeline (retrieve → generate) built with LangGraph.
+* `db/`
+
+  * `session.py` – SQLAlchemy engine/session from `DATABASE_URL`.
+  * `pg.py` – `insert_embeddings()` and `similarity_search()` with pgvector.
+  * `redis.py` – tiny JSON cache for retrieved docs.
+* `infra/`
+
+  * `sql_init.sql` – pgvector schema (768‑d vectors + IVFFLAT index).
+
+**Endpoints**
+
+* `GET /healthz` – liveness probe.
+* `POST /upload` (multipart form) – field `file` (PDF). Returns `{status, chunks}`.
+* `POST /ask` (JSON) – body `{"question": "..."}`. Returns `{answer}`.
+
+**Chunking** (`core/ingest.py`)
+
+* `chunk(text, max_chars=2400, overlap=150)` → \~10–15% overlap preserves context across boundaries.
+
+**Embeddings** (`core/llm.py`)
+
+* Model: `models/embedding-001` with `output_dimensionality=768` (matches `vector(768)`).
+* Task pairing: docs → `RETRIEVAL_DOCUMENT`, queries → `RETRIEVAL_QUERY`.
+* Batching: default `EMBED_BATCH_SIZE=24` (env override) with exponential backoff on 429/5xx.
+
+**Retrieval** (`db/pg.py`)
+
+* Cosine distance: `ORDER BY (e.embedding <=> :query_vec)`.
+* Returns top‑k chunk texts to the generator.
+
+**Generation** (`core/llm.py` → `generate()`)
+
+* Model: `gemini-1.5-flash`.
+* Prompt instructs “answer strictly from provided context; say you can’t find it if missing”.
+
+**Config knobs**
+
+* `.env` – `DATABASE_URL`, `REDIS_URL`, `GEMINI_API_KEY`.
+* (Optional) `EMBED_BATCH_SIZE` – tune request burst to avoid throttling.
+* Adjust `max_chars/overlap` in `core/ingest.py` for ingestion speed vs. recall.
+
