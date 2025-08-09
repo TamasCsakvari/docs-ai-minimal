@@ -58,9 +58,7 @@ curl -X POST -F "file=@data/examplepdf.pdf" http://localhost:8000/upload
 ```
 Ask a question
 ```bash
-curl -X POST http://localhost:8000/ask \
-  -H 'Content-Type: application/json' \
-  -d '{"question": "Summarize the document in 2 sentences."}'
+curl -X POST http://localhost:8000/ask -H "Content-Type: application/json" -d "{\"question\":\"Summarize the document in 2 sentences.\"}"
 ```
 
 ## How It Works
