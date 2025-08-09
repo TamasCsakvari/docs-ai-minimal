@@ -1,14 +1,15 @@
+# core/ingest.py
 import io, uuid
 from typing import List, Tuple
 from pypdf import PdfReader
-from core.llm import embed_texts
+from core.llm import embed_docs
 from db.pg import insert_embeddings
 
 def pdf_to_text(pdf_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(pdf_bytes))
     return "\n".join(page.extract_text() or "" for page in reader.pages)
 
-def chunk(text: str, max_chars=1800, overlap=200) -> List[str]:
+def chunk(text: str, max_chars=2400, overlap=150) -> List[str]:
     if not text:
         return []
     step = max(1, max_chars - overlap)
@@ -19,7 +20,7 @@ def ingest_pdf(pdf_bytes: bytes, source: str) -> int:
     chunks = [c.strip() for c in chunk(text) if c.strip()]
     if not chunks:
         return 0
-    vecs = embed_texts(chunks)
+    vecs = embed_docs(chunks)  # task = RETRIEVAL_DOCUMENT
     rows: List[Tuple[str, str, list, str]] = [
         (str(uuid.uuid4()), c, v, source) for c, v in zip(chunks, vecs)
     ]
