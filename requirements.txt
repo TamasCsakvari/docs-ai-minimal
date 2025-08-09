@@ -8,3 +8,4 @@ pypdf
 google-generativeai
 langgraph
 python-dotenv
+python-multipart
