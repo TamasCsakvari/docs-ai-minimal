@@ -1,79 +1,99 @@
 # core/llm.py
-import os, time
+import os
+import time
+import random
 from typing import List, Literal
 
 # Text generation (stable SDK)
-import google.generativeai as genai_old
+import google.generativeai as genai_text
 
-# Embeddings (new SDK)  ✅ correct import path
-import google.genai as genai_new
+# Embeddings (newer SDK: batching + output_dimensionality)
+from google import genai as genai_emb
 from google.genai import types as genai_types
 from google.genai import errors as genai_errors
 
+# --- Configuration ---
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise RuntimeError("GEMINI_API_KEY is not set")
 
-genai_old.configure(api_key=API_KEY)
-_client = genai_new.Client(api_key=API_KEY)
+# Configure clients
+genai_text.configure(api_key=API_KEY)               # generation
+_emb_client = genai_emb.Client(api_key=API_KEY)     # embeddings
 
-_TEXT_MODEL = genai_old.GenerativeModel("gemini-1.5-flash")
-_EMBED_MODEL = "gemini-embedding-001"
-_EMBED_DIM = 768  # must match vector(768) in DB
+# --- Models ---
+TEXT_MODEL = genai_text.GenerativeModel("gemini-1.5-flash")
+EMBED_MODEL = "models/embedding-001"  # google-genai model name
+EMBED_DIM = 768                       # must match pgvector schema: vector(768)
 
+# Optional tuning via env
+DEFAULT_BATCH = 24
+EMBED_BATCH_SIZE = max(1, min(int(os.getenv("EMBED_BATCH_SIZE", DEFAULT_BATCH)), 100))  # API cap is 100
+
+
+# --- Generation ---
 def generate(prompt: str) -> str:
-    resp = _TEXT_MODEL.generate_content(prompt)
+    resp = TEXT_MODEL.generate_content(prompt)
     return getattr(resp, "text", "")
 
-def _embed_batch(texts: List[str], task_type: Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]) -> List[List[float]]:
-    resp = _client.models.embed_content(
-        model=_EMBED_MODEL,
-        contents=texts,
-        config=genai_types.EmbedContentConfig(
-            task_type=task_type,
-            output_dimensionality=_EMBED_DIM,
-        ),
-    )
-    return [e.values for e in resp.embeddings]
+
+# --- Embeddings ---
+def _embed_batch(
+    texts: List[str],
+    task_type: Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
+) -> List[List[float]]:
+    """
+    Embed a batch of texts with retry/backoff on transient errors.
+    """
+    # Exponential backoff for transient errors/rate limits
+    attempts = 0
+    delay = 1.0
+    while True:
+        try:
+            resp = _emb_client.models.embed_content(
+                model=EMBED_MODEL,
+                contents=texts,
+                config=genai_types.EmbedContentConfig(
+                    task_type=task_type,
+                    output_dimensionality=EMBED_DIM,
+                ),
+            )
+            return [e.values for e in resp.embeddings]
+        except genai_errors.ClientError as e:
+            # 429 or 5xx → backoff; 4xx (other than quota-ish) → raise
+            status = getattr(e, "status_code", None)
+            if status in (429, 500, 502, 503, 504) or "exhausted" in str(e).lower():
+                attempts += 1
+                if attempts > 6:
+                    raise
+                # jittered exponential backoff
+                time.sleep(delay + random.uniform(0, 0.3))
+                delay = min(delay * 2, 16)
+            else:
+                raise
+
 
 def embed_texts(
     texts: List[str],
     task: Literal["retrieval_document", "retrieval_query"] = "retrieval_document",
 ) -> List[List[float]]:
-    # Hard API cap is 100 per request
-    batch_size = 100
+    """
+    Embed a list of texts. Uses batching with API-safe limits and backoff.
+    """
     out: List[List[float]] = []
     ttype = "RETRIEVAL_DOCUMENT" if task == "retrieval_document" else "RETRIEVAL_QUERY"
-
-    # gentle throttle + retries to avoid 429
-    sleep_between_batches = 0.4   # increase to 0.6–1.0 if you still hit 429
-    max_retries = 4
-
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i+batch_size]
-
-        attempt = 0
-        delay = 0.5
-        while True:
-            try:
-                out.extend(_embed_batch(batch, ttype))
-                break
-            except genai_errors.ClientError as e:
-                # retry only on 429
-                if getattr(e, "status_code", None) == 429 and attempt < max_retries:
-                    time.sleep(delay)
-                    delay *= 2
-                    attempt += 1
-                    continue
-                raise
-
-        if i + batch_size < len(texts):
-            time.sleep(sleep_between_batches)
-
+    for i in range(0, len(texts), EMBED_BATCH_SIZE):
+        batch = texts[i:i + EMBED_BATCH_SIZE]
+        out.extend(_embed_batch(batch, ttype))
     return out
 
+
+# Convenience wrappers
 def embed_docs(texts: List[str]) -> List[List[float]]:
+    """Embeddings for documents/chunks."""
     return embed_texts(texts, task="retrieval_document")
 
+
 def embed_query(text: str) -> List[float]:
+    """Embedding for a single user query."""
     return embed_texts([text], task="retrieval_query")[0]
