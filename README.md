@@ -10,65 +10,45 @@ We use:
 * **Redis** for caching
 * **Docker Compose** to run Postgres + Redis locally
 
----
 
 ## 1. Prerequisites
-
 * Python 3.11+
 * Docker Desktop
 * Google AI Studio API key (`GEMINI_API_KEY`)
 
----
 
 ## 2. Clone & Environment Setup
-
 ```bash
 git clone <this-repo-url>
 cd docs-ai-minimal
 ```
 
 ### Create and activate virtual environment
-
-**Windows PowerShell**
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-**macOS/Linux**
-
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+.\.venv\Scripts\Activate.ps1 # Windows PowerShell
+source .venv/bin/activate # macOS/Linux
 ```
 
 ### Install dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Environment variables
-
 Create `.env` in the repo root:
-
 ```env
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/postgres
 REDIS_URL=redis://localhost:6379
 GEMINI_API_KEY=YOUR_GOOGLE_AI_STUDIO_KEY
 ```
 
----
-
 ## 3. Start Postgres + Redis
-
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
 
 Initialize the database schema:
-
 ```bash
 docker cp infra/sql_init.sql docs-ai-minimal-pg-1:/sql_init.sql
 docker exec -it docs-ai-minimal-pg-1 psql -U postgres -f /sql_init.sql
@@ -82,34 +62,20 @@ docker exec -it docs-ai-minimal-pg-1 psql -U postgres -f /sql_init.sql
 python -m uvicorn api.main:app --reload
 ```
 
-* Health check → [http://localhost:8000/healthz](http://localhost:8000/healthz)
-* Swagger UI → [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
 ## 5. Usage
 
 ### Upload a PDF
-
 ```bash
 curl -X POST -F "file=@data/examplepdf.pdf" http://localhost:8000/upload
 ```
 
-**Response:**
-
-```json
-{"status": "ok", "chunks": 909}
-```
-
 ### Ask a question
-
 ```bash
 curl -X POST http://localhost:8000/ask \
   -H 'Content-Type: application/json' \
   -d '{"question": "Summarize the document in 2 sentences."}'
 ```
 
----
 
 ## 6. How It Works
 
