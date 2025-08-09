@@ -13,27 +13,21 @@ We use:
 * Docker Desktop
 * Google AI Studio API key (`GEMINI_API_KEY`)
 
-## Usage
+## Set up
 
-### Clone & Environment Setup
-```bash
-git clone <this-repo-url>
-cd docs-ai-minimal
-```
-
-#### Create and activate virtual environment
+Create and activate virtual environment
 ```bash
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1 # Windows PowerShell
 source .venv/bin/activate # macOS/Linux
 ```
 
-#### Install dependencies
+Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-#### Environment variables
+Set up environment variables
 Create `.env` in the repo root:
 ```env
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/postgres
@@ -41,7 +35,7 @@ REDIS_URL=redis://localhost:6379
 GEMINI_API_KEY=YOUR_GOOGLE_AI_STUDIO_KEY
 ```
 
-### Start Postgres + Redis
+Start Postgres + Redis
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
@@ -52,20 +46,17 @@ docker cp infra/sql_init.sql docs-ai-minimal-pg-1:/sql_init.sql
 docker exec -it docs-ai-minimal-pg-1 psql -U postgres -f /sql_init.sql
 ```
 
-### Run the API server
-
+Run the API server
 ```bash
 python -m uvicorn api.main:app --reload
 ```
 
-### Usage
-
-### Upload a PDF
+## Usage
+Upload a PDF
 ```bash
 curl -X POST -F "file=@data/examplepdf.pdf" http://localhost:8000/upload
 ```
-
-### Ask a question
+Ask a question
 ```bash
 curl -X POST http://localhost:8000/ask \
   -H 'Content-Type: application/json' \
