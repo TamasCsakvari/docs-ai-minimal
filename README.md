@@ -1,21 +1,17 @@
 # Docs-AI Minimal
-
 Local RAG stack using **FastAPI**, **Postgres + pgvector**, **Redis**, and **Gemini** models.
 
 We use:
-
 * **Gemini 1.5 Flash** for text generation
 * **Gemini embeddings** (via `google-genai`) for vector search
 * **pgvector** for similarity search
 * **Redis** for caching
 * **Docker Compose** to run Postgres + Redis locally
 
-
 ## 1. Prerequisites
 * Python 3.11+
 * Docker Desktop
 * Google AI Studio API key (`GEMINI_API_KEY`)
-
 
 ## 2. Clone & Environment Setup
 ```bash
@@ -54,8 +50,6 @@ docker cp infra/sql_init.sql docs-ai-minimal-pg-1:/sql_init.sql
 docker exec -it docs-ai-minimal-pg-1 psql -U postgres -f /sql_init.sql
 ```
 
----
-
 ## 4. Run the API server
 
 ```bash
@@ -76,51 +70,26 @@ curl -X POST http://localhost:8000/ask \
   -d '{"question": "Summarize the document in 2 sentences."}'
 ```
 
-
 ## 6. How It Works
-
 * **/upload** → Extracts PDF text, chunks it (with overlap), generates embeddings via `google-genai` (output\_dimensionality=768), stores in Postgres pgvector.
 * **/ask** → Embeds the query, searches similar chunks in pgvector, sends top results to Gemini 1.5 Flash for the answer.
 
 Chunking config (in `core/ingest.py`):
-
 ```python
 def chunk(text: str, max_chars=2400, overlap=150):
     ...
 ```
-
 * `max_chars` → chunk size
 * `overlap` → shared characters between chunks
 
----
 
 ## 7. Performance Notes
-
 * **Embedding size:** We use 768-d vectors to match `vector(768)` in DB.
 * **Batching:** Implemented with `google-genai` for faster ingestion.
 * **Overlap tuning:** Keep 10–15% overlap to preserve context.
 
----
-
-## 8. Troubleshooting
-
-* **`python-multipart` missing** → `pip install python-multipart`
-* **`cannot adapt type 'builtin_function_or_method'`** → Ensure embeddings return `List[float]`, not a method.
-* **Slow ingestion** → Increase chunk size or batch size, ensure batching is enabled.
-* **No text in PDF** → Must be a text-based PDF, not scanned images.
-
----
-
 ## 9. Reset Local Data
-
+This removes all DB + Redis data.
 ```bash
 docker compose -f docker-compose.dev.yml down -v
 ```
-
-This removes all DB + Redis data.
-
----
-
-## License
-
-AGPL-3.0
