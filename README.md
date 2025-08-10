@@ -14,22 +14,12 @@ FastAPI, LangGraph, Google GenAI **Embedding-001 (768)**, **Gemini 1.5 Flash**, 
 
 ![Docs-AI Minimal](docs/docs-ai-minimal-architecture.drawio.png)
 
-Local RAG stack using **FastAPI**, **Postgres + pgvector**, **Redis**, and **Gemini** models.
-
-We use:
-* **Gemini 1.5 Flash** for text generation
-* **Gemini embeddings** (via `google-genai`) for vector search
-* **pgvector** for similarity search
-* **Redis** for caching
-* **Docker Compose** to run Postgres + Redis locally
-
 ## Requirements
 * Python 3.11+
 * Docker Desktop
 * Google AI Studio API key (`GEMINI_API_KEY`)
 
 ## Set up
-
 Create and activate virtual environment
 ```bash
 python -m venv .venv
