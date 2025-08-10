@@ -1,4 +1,7 @@
 # Docs-AI Minimal
+
+![Docs-AI Minimal](docs/docs-ai-minimal-architecture.drawio.png)
+
 Local RAG stack using **FastAPI**, **Postgres + pgvector**, **Redis**, and **Gemini** models.
 
 We use:
