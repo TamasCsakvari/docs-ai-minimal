@@ -1,5 +1,11 @@
 # Docs-AI Minimal
 
+RAG API for document Q&A that ingests PDFs, finds the most relevant chunks, and returns grounded answers with low latency.
+
+On upload, PDFs are extracted, chunked with overlap, embedded (768-d) and stored in PostgreSQL/pgvector for cosine search; on ask, the query is embedded, top-k chunks are retrieved, and Gemini 1.5 Flash generates a context-bound answer with Redis caching and SQLAlchemy-managed sessions; endpoints: POST /upload, POST /ask.
+
+FastAPI, LangGraph, Google GenAI Embedding-001 (768), Gemini 1.5 Flash, PostgreSQL + pgvector (IVFFLAT), Redis cache, SQLAlchemy, Docker Compose, .env config (DATABASE_URL, REDIS_URL, GEMINI_API_KEY), batching + exponential backoff, cosine similarity search.
+
 ![Docs-AI Minimal](docs/docs-ai-minimal-architecture.drawio.png)
 
 Local RAG stack using **FastAPI**, **Postgres + pgvector**, **Redis**, and **Gemini** models.
