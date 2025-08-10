@@ -1,0 +1,180 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:141.0) Gecko/20100101 Firefox/141.0" version="28.0.9">
+  <diagram name="Azure-PowerBI-Workflow" id="DK7uF9wI8piwNCMI-lbR">
+    <mxGraphModel dx="1967" dy="659" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="FvaSQPkopof4QrB8xM79-282" value="🐳 Dev Infra&#xa;Docker Compose" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-264.0011111111112" y="445" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-273" value="👤 Client" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-771.5" y="60" width="143" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-274" value="💻 API Server&#xa;FastAPI + Uvicorn" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-771.5" y="220" width="143" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-276" value="📥 Ingest&#xa;pypdf parsing &amp; chunking" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-480" y="220" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-278" value="🧰 DB Access&#xa;SQLAlchemy + psycopg" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-165.0011111111112" y="314" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-279" value="🗄️ Chunk + Embedding Store&#xa;Postgres + pgvector" style="whiteSpace=wrap;strokeWidth=2;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="-485" y="314" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-280" value="🧱 Cache&#xa;Redis" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-487" y="430" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-281" value="🧠 LLM&#xa;Gemini 1.5 Flash" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-760" y="580" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-317" value="&lt;div&gt;request similar chunks&lt;/div&gt;" style="shape=connector;rounded=1;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;spacing=10;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=#FFCE9F;startArrow=none;endArrow=block;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-275" target="FvaSQPkopof4QrB8xM79-280">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-570" y="440" />
+              <mxPoint x="-570" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-275" value="🧭 Orchestrator&#xa;LangGraph" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-760" y="340" width="120" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-315" value="" style="edgeStyle=orthogonalEdgeStyle;shape=connector;curved=0;rounded=1;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;spacing=10;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;startArrow=none;endArrow=block;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-277" target="FvaSQPkopof4QrB8xM79-278">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-277" value="🧮 Embedding Model&#xa;Gemini google-genai 768-d" style="whiteSpace=wrap;strokeWidth=2;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="-170.0011111111112" y="220" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-284" value="upload PDF&#xa;POST /upload" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;strokeWidth=1;labelBackgroundColor=#D4E1F5;" edge="1" parent="1">
+          <mxGeometry x="0.0008" y="19" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-639" y="160" />
+              <mxPoint x="-639" y="160" />
+            </Array>
+            <mxPoint x="-639" y="100" as="sourcePoint" />
+            <mxPoint x="-639" y="219.9999999999999" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-285" value="send file&#xa;to ingest" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#D4E1F5;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-274" target="FvaSQPkopof4QrB8xM79-276">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-286" value="send chunks&#xa;for embedding" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#D4E1F5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-276" target="FvaSQPkopof4QrB8xM79-277">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-300" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-287" value="send chunk + embeddings" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#D4E1F5;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-277" target="FvaSQPkopof4QrB8xM79-278">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-288" value="insert &#xa;chunk + embeddings" style="startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#D4E1F5;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-278" target="FvaSQPkopof4QrB8xM79-279">
+          <mxGeometry x="0.0057" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-240" y="330" />
+              <mxPoint x="-240" y="330" />
+            </Array>
+            <mxPoint x="-265.0011111111112" y="342.9999999999999" as="sourcePoint" />
+            <mxPoint x="-390" y="342.9999999999999" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-289" value="ask question&#xa;POST /ask" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#FFCE9F;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-700.52" y="160" />
+              <mxPoint x="-700.52" y="160" />
+            </Array>
+            <mxPoint x="-700.472380952381" y="100" as="sourcePoint" />
+            <mxPoint x="-700.472380952381" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-290" value="start retrieval" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#FFCE9F;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-274" target="FvaSQPkopof4QrB8xM79-275">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-293" value="return similar chunks &#xa;(on cache hit)" style="startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#FFCE9F;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-280" target="FvaSQPkopof4QrB8xM79-275">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-570" y="510" />
+              <mxPoint x="-570" y="510" />
+            </Array>
+            <mxPoint x="-650" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-296" value="similarity search" style="startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#FFCE9F;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-278" target="FvaSQPkopof4QrB8xM79-279">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-240" y="360" />
+              <mxPoint x="-240" y="360" />
+            </Array>
+            <mxPoint x="-265.0011111111112" y="375.9999999999999" as="sourcePoint" />
+            <mxPoint x="-390" y="375.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-297" value="return similar chunks" style="startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#FFCE9F;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-279" target="FvaSQPkopof4QrB8xM79-275">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-550" y="360" />
+              <mxPoint x="-550" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-298" value="save chunks to cache&#xa;(after retrieval)" style="startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;fontStyle=0;labelBackgroundColor=#FFCE9F;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-275" target="FvaSQPkopof4QrB8xM79-280">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-560" y="475" />
+              <mxPoint x="-560" y="475" />
+            </Array>
+            <mxPoint x="-450" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-299" value="compose prompt&#xa;with context" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;strokeColor=default;jumpStyle=arc;flowAnimation=0;sourcePerimeterSpacing=0;orthogonalLoop=0;orthogonal=1;labelBackgroundColor=#FFCE9F;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-275" target="FvaSQPkopof4QrB8xM79-281">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-700.42" y="450" as="sourcePoint" />
+            <mxPoint x="-700.42" y="560" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-300" value="answer&#xa;text" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#D5E8D4;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-281" target="FvaSQPkopof4QrB8xM79-274">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-790" y="610" />
+              <mxPoint x="-790" y="250" />
+            </Array>
+            <mxPoint x="-760" y="600.0000000000002" as="sourcePoint" />
+            <mxPoint x="-770" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-301" value="answer&#xa;to client" style="startArrow=none;endArrow=block;rounded=1;spacing=10;edgeStyle=orthogonalEdgeStyle;orthogonal=1;jumpStyle=arc;labelBackgroundColor=#D5E8D4;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-274" target="FvaSQPkopof4QrB8xM79-273">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-760" y="160" />
+              <mxPoint x="-760" y="160" />
+            </Array>
+            <mxPoint x="-760" y="240.0000000000001" as="sourcePoint" />
+            <mxPoint x="-760" y="70" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-302" value="runs" style="dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;exitX=0.117;exitY=-0.031;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-282" target="FvaSQPkopof4QrB8xM79-279">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-303" value="runs" style="dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;rounded=1;spacing=10;orthogonal=1;jumpStyle=arc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-282" target="FvaSQPkopof4QrB8xM79-280">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-312" value="&lt;div&gt;&lt;b&gt;Legend&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: rgb(212, 225, 245);&quot;&gt;&amp;nbsp; Ingest &lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;(Upload → Index)&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: rgb(255, 206, 159);&quot;&gt;&amp;nbsp; In &lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;(Ask → Retrieve → Compose)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: rgb(213, 232, 212);&quot;&gt;&amp;nbsp; Out &lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;(Answer → Respond)&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Helvetica;fontSize=14;fontColor=default;labelBackgroundColor=default;" vertex="1" parent="1">
+          <mxGeometry x="-500" y="80" width="260" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="FvaSQPkopof4QrB8xM79-316" value="&lt;div&gt;request similar chunks&lt;/div&gt;&lt;div&gt;(if no cache hit)&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;shape=connector;curved=0;rounded=1;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;spacing=10;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=#FFCE9F;startArrow=none;endArrow=block;" edge="1" parent="1" source="FvaSQPkopof4QrB8xM79-275" target="FvaSQPkopof4QrB8xM79-278">
+          <mxGeometry x="-0.1491" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-130" y="400" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
