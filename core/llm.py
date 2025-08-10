@@ -3,16 +3,11 @@ import os
 import time
 import random
 from typing import List, Literal
-
-# Text generation (stable SDK)
 import google.generativeai as genai_text
-
-# Embeddings (newer SDK: batching + output_dimensionality)
 from google import genai as genai_emb
 from google.genai import types as genai_types
 from google.genai import errors as genai_errors
 
-# --- Configuration ---
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     raise RuntimeError("GEMINI_API_KEY is not set")
@@ -21,7 +16,6 @@ if not API_KEY:
 genai_text.configure(api_key=API_KEY)               # generation
 _emb_client = genai_emb.Client(api_key=API_KEY)     # embeddings
 
-# --- Models ---
 TEXT_MODEL = genai_text.GenerativeModel("gemini-1.5-flash")
 EMBED_MODEL = "models/embedding-001"  # google-genai model name
 EMBED_DIM = 768                       # must match pgvector schema: vector(768)
@@ -30,20 +24,23 @@ EMBED_DIM = 768                       # must match pgvector schema: vector(768)
 DEFAULT_BATCH = 24
 EMBED_BATCH_SIZE = max(1, min(int(os.getenv("EMBED_BATCH_SIZE", DEFAULT_BATCH)), 100))  # API cap is 100
 
-
-# --- Generation ---
 def generate(prompt: str) -> str:
     resp = TEXT_MODEL.generate_content(prompt)
     return getattr(resp, "text", "")
 
 
-# --- Embeddings ---
 def _embed_batch(
-    texts: List[str],
-    task_type: Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
+    texts: List[str], task_type: Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
 ) -> List[List[float]]:
     """
-    Embed a batch of texts with retry/backoff on transient errors.
+    Embeds a batch of text with exponential backoff for transient errors/rate limits
+
+    Args:
+        texts: list of text strings to embed
+        task_type: task type for embedding (RETRIEVAL_DOCUMENT or RETRIEVAL_QUERY)
+
+    Returns:
+        list of embedding vectors (list of lists of floats)
     """
     # Exponential backoff for transient errors/rate limits
     attempts = 0
@@ -87,12 +84,10 @@ def embed_texts(
         out.extend(_embed_batch(batch, ttype))
     return out
 
-
 # Convenience wrappers
 def embed_docs(texts: List[str]) -> List[List[float]]:
     """Embeddings for documents/chunks."""
     return embed_texts(texts, task="retrieval_document")
-
 
 def embed_query(text: str) -> List[float]:
     """Embedding for a single user query."""

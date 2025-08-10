@@ -88,71 +88,55 @@ def chunk(text: str, max_chars=2400, overlap=150):
 * `max_chars` → chunk size
 * `overlap` → shared characters between chunks
 
-
-
 ## Reset Local Data
 This removes all DB + Redis data.
 ```bash
 docker compose -f docker-compose.dev.yml down -v
 ```
 
-
-
 ## Code Architecture & Functionality
 
 **High-level flow**
-
 1. `POST /upload` → extract PDF text → chunk → embed chunks (batching + backoff) → store text + vectors in Postgres (pgvector).
 2. `POST /ask` → embed query → cosine search in pgvector → pass top docs as context to Gemini → return grounded answer.
 
 **Directories**
-
 * `api/`
-
   * `main.py` – FastAPI app + router registration.
   * `routes.py` – HTTP endpoints: `/healthz`, `/upload`, `/ask`.
 * `core/`
-
   * `ingest.py` – PDF → text, chunking, calls `embed_docs()` and persists rows.
   * `llm.py` – Text generation (Gemini 1.5 Flash) and embeddings (google‑genai) with batching + retry/backoff.
   * `workflows.py` – Minimal RAG pipeline (retrieve → generate) built with LangGraph.
 * `db/`
-
   * `session.py` – SQLAlchemy engine/session from `DATABASE_URL`.
   * `pg.py` – `insert_embeddings()` and `similarity_search()` with pgvector.
   * `redis.py` – tiny JSON cache for retrieved docs.
 * `infra/`
-
   * `sql_init.sql` – pgvector schema (768‑d vectors + IVFFLAT index).
 
 **Endpoints**
-
 * `GET /healthz` – liveness probe.
 * `POST /upload` (multipart form) – field `file` (PDF). Returns `{status, chunks}`.
 * `POST /ask` (JSON) – body `{"question": "..."}`. Returns `{answer}`.
 
 **Chunking** (`core/ingest.py`)
-
-* `chunk(text, max_chars=2400, overlap=150)` → \~10–15% overlap preserves context across boundaries.
+* `chunk(text, max_chars=2400, overlap=150)` →  overlap preserves context across boundaries.
 
 **Embeddings** (`core/llm.py`)
-
 * Model: `models/embedding-001` with `output_dimensionality=768` (matches `vector(768)`).
 * Task pairing: docs → `RETRIEVAL_DOCUMENT`, queries → `RETRIEVAL_QUERY`.
 * Batching: default `EMBED_BATCH_SIZE=24` (env override) with exponential backoff on 429/5xx.
 
 **Retrieval** (`db/pg.py`)
-
 * Cosine distance: `ORDER BY (e.embedding <=> :query_vec)`.
 * Returns top‑k chunk texts to the generator.
 
 **Generation** (`core/llm.py` → `generate()`)
-
 * Model: `gemini-1.5-flash`.
 * Prompt instructs “answer strictly from provided context; say you can’t find it if missing”.
 
-**Config knobs**
-
+**Config**
 * `.env` – `DATABASE_URL`, `REDIS_URL`, `GEMINI_API_KEY`.
 * (Optional) `EMBED_BATCH_SIZE` – tune request burst to avoid throttling.
 * Adjust `max_chars/overlap` in `core/ingest.py` for ingestion speed vs. recall.
